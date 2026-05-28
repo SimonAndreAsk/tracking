@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "gtm-stape": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://gtm-mcp.stape.ai/mcp"
+      ]
+    },
+    "Playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {}
+    }
+  }
+}

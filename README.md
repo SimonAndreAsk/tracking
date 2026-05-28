@@ -1,41 +1,73 @@
-# Enterprise Tracking Governance
+# Enterprise Tracking Governance Hub
 
-Central data governance repository hosting enterprise data contracts and modular JSON schemas for automated data layer validation and CI/CD quality gate enforcement.
+Centralized data governance repository hosting enterprise data contracts, downstream system dependency maps, and custom automation infrastructure for automated data layer validation and synchronous GTM deployment.
 
 ## Overview
 
-This repository defines the canonical tracking contracts for multi-tenant analytics implementations. Contracts are version-controlled, schema-validated, and intended to integrate with automated quality gates in deployment pipelines—ensuring that instrumentation changes do not break downstream reporting or dashboard dependencies.
+This repository is the single source of truth for analytics instrumentation across the portfolio. It separates **binding data laws** (contracts and dependency maps) from **local automation tooling** (GTM API scripts, validators, MCP environments) so engineering and analytics can agree on contracts in version control while automation evolves independently in `automation/`.
 
-## Directory Layout
+Contracts are validated in CI/CD; protected telemetry keys are registered for downstream impact analysis; the automation layer provisions and audits Google Tag Manager containers programmatically.
+
+## Why `contracts/` and not `schemas/`?
+
+We use **contracts** deliberately. A JSON Schema in this repo is not merely documentation—it is a **binding architectural agreement** between engineering and analytics:
+
+| Term | Meaning in this repo |
+|------|----------------------|
+| **Contract** | Enforceable specification. Breaking changes require review, manifest updates, and stakeholder sign-off. |
+| **Schema** (colloquial) | Often implies optional or illustrative structure; we avoid that naming to prevent "soft" specs. |
+
+Extension contracts under `contracts/extensions/` must remain compatible with global requirements in `contracts/core/`. Validators should reject payloads that violate `additionalProperties`, missing required fields, or const event names.
+
+## Directory layout
 
 ```
-├── contracts/
-│   ├── core/          # Global data contracts (e.g., pageviews, consent)
-│   └── extensions/    # Property-specific feature contracts (e.g., simonask-io/)
-└── dependencies/      # Downstream dashboard and tool impact mappings
+├── contracts/                  # Binding data layer agreements (JSON Schema Draft-07)
+│   ├── core/                   # Enterprise-wide contracts (pageviews, consent, session context)
+│   └── extensions/             # Site-specific property contracts
+│       └── simonask-io/        # Main portfolio site environment
+├── dependencies/               # Downstream BI/reporting impact maps
+└── automation/                 # GTM API tooling, scripts, MCP servers ("Batcave")
 ```
 
 ### `contracts/`
 
-The `contracts/` folder is the source of truth for all tracking specifications.
-
 | Path | Purpose |
 |------|---------|
-| `contracts/core/` | **Global contracts** shared across all properties and tenants. Define baseline events and attributes required for enterprise-wide reporting (e.g., pageviews, consent signals, session context). |
-| `contracts/extensions/` | **Property-specific extensions** that build on core contracts. Each subdirectory represents a site or product (e.g., `simonask-io/`) and contains JSON Schema definitions for feature-level events unique to that property. |
-
-Extension contracts must remain compatible with core requirements. CI pipelines should validate that extension schemas do not redefine or conflict with core field definitions.
+| `contracts/core/` | Global contracts shared by every property. Baseline events and attributes required for enterprise reporting. |
+| `contracts/extensions/` | Property-specific contracts. Each subdirectory is an environment (e.g. `simonask-io/`). |
 
 ### `dependencies/`
 
-The `dependencies/` folder maps tracking contracts to downstream consumers—BI dashboards, Looker explores, BigQuery views, and other analytics tooling. The `dashboard-manifest.json` file lists critical tracking keys that pipelines can grep against to flag breaking changes before merge.
+Maps contracts to downstream consumers—Power BI, GA4, marketing pixels, Looker, BigQuery views, and other tooling.
 
-## Getting Started
+`dashboard-manifest.json` is a JSON array of **protected telemetry keys**. CI and automation should grep or diff against it to flag breaking changes before merge.
 
-1. Add or update schemas under `contracts/core/` or `contracts/extensions/<property>/`.
-2. Register any new fields consumed by dashboards in `dependencies/dashboard-manifest.json`.
-3. Wire schema validation into your CI/CD pipeline using Draft-07 JSON Schema validators.
+### `automation/`
 
-## Example: Property Extension
+Houses custom engineering scripts, GTM API (v2) orchestration, localized MCP server environments, and (locally, gitignored) Google Cloud service account material. See [automation/README.md](automation/README.md).
 
-`contracts/extensions/simonask-io/contact-contract.json` defines the strict `contact_click` event contract for the simonask.io property, including required `button_location` and optional `user_language` fields.
+## Getting started
+
+1. Add or update Draft-07 contracts under `contracts/core/` or `contracts/extensions/<property>/`.
+2. Register keys consumed by dashboards or tags in `dependencies/dashboard-manifest.json`.
+3. Add validators and GTM tooling under `automation/`; wire contract checks into CI/CD (e.g. AJV for Draft-07).
+4. Never commit credentials; use `automation/credentials/` locally with paths ignored by `.gitignore`.
+
+## Example: property extension
+
+[`contracts/extensions/simonask-io/contact-contract.json`](contracts/extensions/simonask-io/contact-contract.json) defines the strict `contact_click` dataLayer contract:
+
+- `event` — required string, constant `"contact_click"`
+- `button_location` — required string
+- `user_language` — optional string
+- `additionalProperties: false` — no undeclared fields permitted
+
+## Protected downstream keys
+
+Initial manifest (`dependencies/dashboard-manifest.json`):
+
+- `contact_click`
+- `button_location`
+- `conversion_value`
+- `dealer_id`

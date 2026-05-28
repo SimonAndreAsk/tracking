@@ -1,5 +1,6 @@
 [
   "contact_click",
   "button_location",
-  "conversion_value"
+  "conversion_value",
+  "dealer_id"
 ]

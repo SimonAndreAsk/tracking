@@ -1,2 +1,21 @@
 # Cursor IDE MCP descriptors (not part of tracking governance)
 mcps/
+
+# Automation secrets and local credentials (never commit)
+automation/credentials/*
+!automation/credentials/.gitkeep
+*.credentials.json
+**/oauth-client.json
+**/oauth-token.json
+service-account*.json
+**/service-account*.json
+*.pem
+*.p12
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node dependencies (automation/)
+automation/node_modules/

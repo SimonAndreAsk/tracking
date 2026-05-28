@@ -1,0 +1,19 @@
+{
+  "name": "@tracking/automation",
+  "private": true,
+  "type": "module",
+  "description": "GTM API v2 orchestration and contract validators for the tracking governance hub",
+  "scripts": {
+    "gtm:auth": "node scripts/auth-oauth.mjs",
+    "gtm:verify": "node scripts/verify-gtm-connection.mjs",
+    "gtm:accounts": "node scripts/list-accounts.mjs",
+    "gtm:containers": "node scripts/list-containers.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "googleapis": "^148.0.0"
+  }
+}
