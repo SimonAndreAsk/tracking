@@ -9,9 +9,8 @@
       ]
     },
     "Playwright": {
-      "command": "npx",
-      "args": ["@playwright/mcp@latest"],
-      "env": {}
+      "command": "node",
+      "args": ["qa/scripts/run-playwright-mcp.mjs"]
     }
   }
 }

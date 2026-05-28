@@ -12,10 +12,25 @@ service-account*.json
 *.pem
 *.p12
 
-# Environment files
+# Environment files (never commit real values)
 .env
 .env.*
 !.env.example
+!**/.env.example
+**/.env
+!**/.env.example
 
-# Node dependencies (automation/)
+# Node dependencies
 automation/node_modules/
+qa/node_modules/
+node_modules/
+
+# Playwright / QA artifacts
+.playwright-mcp/
+qa/.playwright-mcp/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+qa/test-results/
+qa/playwright-report/

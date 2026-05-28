@@ -1,20 +1,22 @@
-# MCP — Stape Google Tag Manager
+# MCP — Cursor agent servers
 
-This repo is configured to use [Stape's GTM MCP server](https://github.com/stape-io/google-tag-manager-mcp-server) from Cursor.
+This repo configures two MCP servers in [`.cursor/mcp.json`](../../.cursor/mcp.json). Cursor also merges **global** servers from `%USERPROFILE%\.cursor\mcp.json` (e.g. Sanity).
 
-## Cursor setup
+After changing config: **restart Cursor** or reload MCP servers.
 
-Config for this repo: [`.cursor/mcp.json`](../../.cursor/mcp.json) (`gtm-stape`, `Playwright`).
+## Servers
 
-Cursor also loads **global** servers from `%USERPROFILE%\.cursor\mcp.json` (e.g. Sanity). Project + global configs are merged.
+| Server | Purpose | Docs |
+|--------|---------|------|
+| `gtm-stape` | Google Tag Manager via [Stape MCP](https://github.com/stape-io/google-tag-manager-mcp-server) | Below |
+| `Playwright` | Browser automation for staging QA | [`qa/README.md`](../../qa/README.md) |
 
-After adding or changing config:
+## GTM (Stape)
 
-1. **Restart Cursor** (or reload MCP servers in settings).
-2. When prompted, complete **Google OAuth** in the browser (same account as [tagmanager.google.com](https://tagmanager.google.com/)).
-3. Stape stores tokens in `~/.mcp-auth` (separate from `automation/credentials/oauth-token.json`).
+1. Restart Cursor and complete **Google OAuth** when prompted (same account as [tagmanager.google.com](https://tagmanager.google.com)).
+2. Stape stores tokens in `~/.mcp-auth` (separate from `automation/credentials/oauth-token.json`).
 
-## simonask.io containers (reference)
+### simonask.io containers (reference)
 
 | Container | ID | Public ID |
 |-----------|-----|-----------|
@@ -23,13 +25,19 @@ After adding or changing config:
 
 Account ID: `6268381941`
 
-## Scopes
+### Scopes
 
-- Stape MCP uses its own OAuth flow with GTM API access for create/update operations (when tools allow).
-- Local `automation/` scripts use `GTM_SCOPES` in `.env` (currently read-only unless you widen it).
+- Stape MCP uses its own OAuth flow for GTM API create/update when tools allow.
+- Local `automation/` scripts use `GTM_SCOPES` in `automation/.env` (read-only by default).
 
-## Troubleshooting
+### Troubleshooting
 
 - **Tools missing in Cursor:** Server name is kept short (`gtm-stape`) — Cursor filters tools when name + tool name exceeds ~60 characters.
 - **Auth stuck:** `Remove-Item -Recurse -Force "$env:USERPROFILE\.mcp-auth"` then restart Cursor and sign in again.
 - **Docs:** [Stape GTM MCP setup](https://stape.io/helpdesk/documentation/how-to-set-up-mcp-server-for-gtm)
+
+## Playwright (staging QA)
+
+Configured to run `qa/scripts/run-playwright-mcp.mjs`, which loads the repo root `.env` and applies Vercel deployment-protection bypass headers for `stage.simonask.io`.
+
+See [`qa/README.md`](../../qa/README.md) for setup (`VERCEL_AUTOMATION_BYPASS_SECRET`) and test commands.

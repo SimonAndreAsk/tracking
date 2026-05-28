@@ -1,0 +1,14 @@
+{
+  "name": "@tracking/qa",
+  "private": true,
+  "type": "module",
+  "description": "Playwright E2E tests and MCP browser automation for analytics QA",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "mcp": "node scripts/run-playwright-mcp.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

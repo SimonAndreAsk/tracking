@@ -8,6 +8,23 @@ This repository is the single source of truth for analytics instrumentation acro
 
 Contracts are validated in CI/CD; protected telemetry keys are registered for downstream impact analysis; the automation layer provisions and audits Google Tag Manager containers programmatically.
 
+## Quick start
+
+| Goal | Where to start |
+|------|----------------|
+| Define or change a dataLayer contract | [`contracts/README.md`](contracts/README.md) |
+| Register protected dashboard keys | [`dependencies/README.md`](dependencies/README.md) |
+| GTM API scripts & OAuth | [`automation/README.md`](automation/README.md) |
+| Staging QA / Playwright MCP | [`qa/README.md`](qa/README.md) |
+| Cursor MCP servers (GTM + browser) | [`automation/mcp/README.md`](automation/mcp/README.md) |
+
+**Environment files (gitignored):**
+
+- **Repo root `.env`** — Vercel staging bypass for Playwright ([`.env.example`](.env.example))
+- **`automation/.env`** — GTM API credentials ([`automation/.env.example`](automation/.env.example))
+
+Before commit/push, run `node scripts/check-before-commit.mjs` (after `git add`) to scan for accidental secrets.
+
 ## Why `contracts/` and not `schemas/`?
 
 We use **contracts** deliberately. A JSON Schema in this repo is not merely documentation—it is a **binding architectural agreement** between engineering and analytics:
@@ -22,37 +39,31 @@ Extension contracts under `contracts/extensions/` must remain compatible with gl
 ## Directory layout
 
 ```
-├── contracts/                  # Binding data layer agreements (JSON Schema Draft-07)
-│   ├── core/                   # Enterprise-wide contracts (pageviews, consent, session context)
-│   └── extensions/             # Site-specific property contracts
-│       └── simonask-io/        # Main portfolio site environment
-├── dependencies/               # Downstream BI/reporting impact maps
-└── automation/                 # GTM API tooling, scripts, MCP servers ("Batcave")
+├── contracts/          # Binding data layer agreements (JSON Schema Draft-07)
+│   ├── core/           # Enterprise-wide contracts
+│   └── extensions/     # Per-property contracts (e.g. simonask-io/)
+├── dependencies/       # Downstream BI/reporting impact maps
+├── automation/         # GTM API v2 scripts, credentials, MCP docs
+├── qa/                 # Playwright E2E tests & staging browser automation
+├── .cursor/            # Cursor MCP configuration (project-local)
+└── .env.example        # Vercel bypass secret template (copy → .env)
 ```
 
 ### `contracts/`
 
-| Path | Purpose |
-|------|---------|
-| `contracts/core/` | Global contracts shared by every property. Baseline events and attributes required for enterprise reporting. |
-| `contracts/extensions/` | Property-specific contracts. Each subdirectory is an environment (e.g. `simonask-io/`). |
+See [`contracts/README.md`](contracts/README.md). Global rules live in `core/`; property-specific rules in `extensions/<property>/`.
 
 ### `dependencies/`
 
-Maps contracts to downstream consumers—Power BI, GA4, marketing pixels, Looker, BigQuery views, and other tooling.
-
-`dashboard-manifest.json` is a JSON array of **protected telemetry keys**. CI and automation should grep or diff against it to flag breaking changes before merge.
+See [`dependencies/README.md`](dependencies/README.md). `dashboard-manifest.json` lists **protected telemetry keys** for CI and automation.
 
 ### `automation/`
 
-Houses custom engineering scripts, GTM API (v2) orchestration, localized MCP server environments, and (locally, gitignored) Google Cloud service account material. See [automation/README.md](automation/README.md).
+GTM API orchestration, OAuth/service account setup, and agent tooling. See [`automation/README.md`](automation/README.md).
 
-## Getting started
+### `qa/`
 
-1. Add or update Draft-07 contracts under `contracts/core/` or `contracts/extensions/<property>/`.
-2. Register keys consumed by dashboards or tags in `dependencies/dashboard-manifest.json`.
-3. Add validators and GTM tooling under `automation/`; wire contract checks into CI/CD (e.g. AJV for Draft-07).
-4. Never commit credentials; use `automation/credentials/` locally with paths ignored by `.gitignore`.
+Playwright tests, Vercel deployment-protection bypass for `stage.simonask.io`, and Playwright MCP for Cursor. See [`qa/README.md`](qa/README.md).
 
 ## Example: property extension
 
@@ -65,7 +76,7 @@ Houses custom engineering scripts, GTM API (v2) orchestration, localized MCP ser
 
 ## Protected downstream keys
 
-Initial manifest (`dependencies/dashboard-manifest.json`):
+Initial manifest ([`dependencies/dashboard-manifest.json`](dependencies/dashboard-manifest.json)):
 
 - `contact_click`
 - `button_location`

@@ -1,0 +1,12 @@
+{
+  "outputDir": ".playwright-mcp",
+  "browser": {
+    "contextOptions": {
+      "userAgent": "Playwright-Analytics-QA-Gate",
+      "extraHTTPHeaders": {
+        "x-vercel-set-bypass-cookie": "true"
+      }
+    },
+    "initPage": ["./playwright-mcp-init.mjs"]
+  }
+}
